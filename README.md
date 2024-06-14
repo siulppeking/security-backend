@@ -12,8 +12,8 @@ Welcome to the **Node JS - Backend Security Application** repository! This proje
 First, clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/siulppeking/node-js-auth.git
-cd node-js-auth
+git clone https://github.com/siulppeking/seguridad-backend.git
+cd seguridad-backend
 ```
 
 ## Usage
