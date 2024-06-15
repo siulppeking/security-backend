@@ -21,6 +21,7 @@ app.use(cors());
 app.use(express.json());
 
 // routes
+app.use(express.static(__dirname + '/public'))
 app.use('/api/v1/auth', v1AuthRouter);
 app.use('/api/v1/categories', v1CategoryRouter);
 

@@ -30,8 +30,17 @@ const login = [
         validateResult(req, res, next)
     }
 ]
+const google = [
+    check('googleToken')
+        .exists().withMessage('Google token request must contain')
+        .notEmpty().withMessage('Google token not empty'),
+    (req, res, next) => {
+        validateResult(req, res, next)
+    }
+]
 
 module.exports = {
     register,
-    login
+    login,
+    google
 }
