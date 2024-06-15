@@ -62,7 +62,7 @@
     <script>
         function handleCredentialResponse(response) {
             const raw = { googleToken: response.credential }
-            fetch('http://localhost:3000/api/v1/auth/google', {
+            fetch('https://security-backend-w8ys.onrender.com/api/v1/auth/google', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
