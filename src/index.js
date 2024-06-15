@@ -1,10 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { connectDatabase } = require('./database');
-const { v1CategoryRouter } = require('./routers/category.router');
-const { v1UserRouter } = require('./routers/user.router');
 const morgan = require('morgan');
+const { connectDatabase } = require('./database');
+const v1AuthRouter = require('./routers/auth.router');
+const v1CategoryRouter = require('./routers/category.router');
 
 // Config PORT environment
 const PORT = process.env.PORT || 3000;
@@ -21,8 +21,8 @@ app.use(cors());
 app.use(express.json());
 
 // routes
+app.use('/api/v1/auth', v1AuthRouter);
 app.use('/api/v1/categories', v1CategoryRouter);
-app.use('/api/v1/users', v1UserRouter);
 
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`)

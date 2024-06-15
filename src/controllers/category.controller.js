@@ -1,83 +1,181 @@
 const { Category } = require('../models/category');
-const categoryService = require('../services/category.service');
 
 const getAllCategories = async (req, res) => {
-    const categories = await categoryService.getAllCategories();
+    try {
+        const categories = await Category.find();
 
-    return res.status(200).send({ status: "OK", data: categories });
+        const categoriesData = categories.map((category) => {
+            return {
+                categoryId: category._id,
+                name: category.name,
+                description: category.description,
+                active: category.active
+            }
+        });
+        return res.status(200).send({
+            status: "OK",
+            data: categoriesData
+        });
+    } catch (error) {
+        return res.status(500).send({
+            status: "EXCEPTION_ERROR",
+            data: { message: error.message }
+        });
+    }
 }
 
 const getCategoryById = async (req, res) => {
-    const categoryId = req.params.categoryId;
-
-    const category = await categoryService.getCategoryById(categoryId);
-
-    if (!category) {
-        return res.status(404)
-            .send({
-                status: "FAILDED", data: {
-                    error: `Category ${categoryId} not found`
-                }
+    try {
+        const { categoryId } = req.params;
+        const category = await Category.findById(categoryId);
+        if (!category) {
+            return res.status(404).send({
+                status: "NOT_FOUND",
+                data: { message: `Category ${categoryId} not found` }
             });
+        }
+        const categoryData = {
+            categoryId: category._id,
+            name: category.name,
+            description: category.description,
+            active: category.active
+        }
+        return res.status(200).send({
+            status: "OK",
+            data: categoryData
+        });
+    } catch (error) {
+        return res.status(500).send({
+            status: "EXCEPTION_ERROR",
+            data: { message: error.message }
+        });
     }
-
-
-    return res.status(200).json({
-        status: "OK", data: category
-    })
 }
 
 const createCategory = async (req, res) => {
-    const { body: categoryNew } = req;
+    const { body: categoryBody } = req;
     try {
-        const category = await Category.findOne({ name: categoryNew.name });
+        const category = await Category.findOne({ name: categoryBody.name });
         if (category) {
-            return res.status(403)
-                .send({ status: "FAILDED_DATA", data: { error: `Category ${categoryNew.name} already exists` } });
+            return res.status(400).send({
+                status: "VALIDATION_DATA",
+                data: { message: `Category ${categoryBody.name} already exists` }
+            });
         }
+        const categoryNew = new Category(categoryBody);
+        const categorySaved = await categoryNew.save();
 
-        const categoryCreated = await categoryService.createCategory(categoryNew);
-
-        res.status(201).send({ status: "OK", data: categoryCreated });
+        const categoryData = {
+            categoryId: categorySaved._id,
+            name: categorySaved.name,
+            description: categorySaved.description,
+            active: categorySaved.active
+        }
+        return res.status(201).send({
+            status: "OK",
+            data: {
+                message: 'Category created successfully',
+                body: categoryData
+            }
+        });
     } catch (error) {
-        res
-            .status(error?.status || 500)
-            .send({ status: "FAILDED", data: { error: error?.message || error } });
+        return res.status(500).send({
+            status: "EXCEPTION_ERROR",
+            data: { message: error.message }
+        });
     }
 }
 
 const updateCategory = async (req, res) => {
-    const categoryId = req.params.categoryId;
-
-    const category = await categoryService.getCategoryById(categoryId);
-    if (!category) {
-        return res.status(404)
-            .send({
-                status: "FAILDED", data: {
-                    error: `Category ${categoryId} not found`
-                }
+    try {
+        const { categoryId } = req.params;
+        const category = await Category.findById(categoryId);
+        if (!category) {
+            return res.status(404).send({
+                status: "NOT_FOUND",
+                data: { message: `Category ${categoryId} not found` }
             });
-    }
-    const { body: categoryUpd } = req;
+        }
+        const { body: categoryBody } = req;
 
-    const categoryUpdated = await categoryService.updateCategory(categoryId, categoryUpd);
-    res.status(200).send({ status: "OK", data: categoryUpdated });
+        categoryBody.updated_at = Date.now();
+        const categoryUpdated = await Category.findByIdAndUpdate(categoryId, categoryBody, { new: true });
+        const categoryData = {
+            categoryId: categoryUpdated._id,
+            name: categoryUpdated.name,
+            description: categoryUpdated.description,
+            active: categoryUpdated.active
+        }
+        return res.status(200).send({
+            status: "OK",
+            data: {
+                message: 'Category updated successfully',
+                body: categoryData
+            }
+        });
+    } catch (error) {
+        return res.status(500).send({
+            status: "EXCEPTION_ERROR",
+            data: { message: error.message }
+        });
+    }
 }
 
 const deleteCategory = async (req, res) => {
-    const categoryId = req.params.categoryId;
-
-    const category = await categoryService.getCategoryById(categoryId);
-    if (!category) {
-        return res.status(404)
-            .send({
-                status: "FAILDED", data: {
-                    error: `Category ${categoryId} not found`
-                }
+    try {
+        const { categoryId } = req.params;
+        const category = await Category.findByIdAndDelete(categoryId);
+        if (!category) {
+            return res.status(404).send({
+                status: "NOT_FOUND",
+                data: { message: `Category ${categoryId} not found` }
             });
+        }
+        return res.status(200).send({
+            status: "OK",
+            data: {
+                message: 'Category deleted successfully'
+            }
+        });
+    } catch (error) {
+        return res.status(500).send({
+            status: "EXCEPTION_ERROR",
+            data: { message: error.message }
+        });
     }
-    await categoryService.deleteCategory(categoryId);
-    return res.status(204);
+}
+
+const changeStatusCategory = async (req, res) => {
+    try {
+        const { categoryId } = req.params;
+        const category = await Category.findById(categoryId);
+        if (!category) {
+            return res.status(404).send({
+                status: "NOT_FOUND",
+                data: { message: `Category ${categoryId} not found` }
+            });
+        }
+        category.active = !category.active;
+        const categoryUpdated = await Category.findByIdAndUpdate(categoryId, category, { new: true });
+        const categoryData = {
+            categoryId: categoryUpdated._id,
+            name: categoryUpdated.name,
+            description: categoryUpdated.description,
+            active: categoryUpdated.active
+        }
+        return res.status(200).send({
+            status: "OK",
+            data: {
+                message: 'Category change status successfully',
+                body: categoryData
+            }
+        });
+    } catch (error) {
+        return res.status(500).send({
+            status: "EXCEPTION_ERROR",
+            data: { message: error.message }
+        });
+    }
 }
 
 module.exports = {
@@ -85,5 +183,6 @@ module.exports = {
     getCategoryById,
     createCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    changeStatusCategory
 }

@@ -5,10 +5,12 @@ const validateResult = (req, res, next) => {
         validationResult(req).throw()
         return next()
     } catch (err) {
-        res.status(403)
+        res.status(400)
         res.send({
             status: 'VALIDATION_ERRORS',
-            errors: err.array()
+            data: {
+                errors: err.array()
+            }
         })
     }
 }

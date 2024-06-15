@@ -9,7 +9,7 @@ const login = async (req, res) => {
     try {
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(400).json({
+            return res.status(400).send({
                 status: 'FAILDED_DATA',
                 data: {
                     error: 'Invalid credentials'
@@ -19,7 +19,7 @@ const login = async (req, res) => {
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(400).json({
+            return res.status(400).send({
                 status: 'FAILDED_DATA',
                 data: {
                     error: 'Invalid credentials pass'
@@ -37,9 +37,9 @@ const login = async (req, res) => {
 
         const userAccess = new UserAccess({ user: user._id, token, host, browser })
         await userAccess.save();
-        res.json({ token });
+        res.send({ token });
     } catch (error) {
-        res.status(500).json({ message: 'Error logging in', error });
+        res.status(500).send({ message: 'Error logging in', error });
     }
 }
 
@@ -49,7 +49,7 @@ const register = async (req, res) => {
     try {
         const userEmail = await User.findOne({ email });
         if (userEmail) {
-            return res.status(400).json({
+            return res.status(400).send({
                 status: 'FAILDED_DATA',
                 data: {
                     error: 'Email already exists'
@@ -60,9 +60,9 @@ const register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = new User({ username, email, password: hashedPassword });
         await user.save();
-        res.status(201).json({ message: 'User registered successfully' });
+        res.status(201).send({ message: 'User registered successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Error registering user', error });
+        res.status(500).send({ message: 'Error registering user', error });
     }
 }
 
@@ -70,7 +70,7 @@ const register = async (req, res) => {
 const getAllUsers = async (req, res) => {
     const users = await userController.getAllUsers();
 
-    res.status(200).json({
+    res.status(200).send({
         status: 'OK',
         data: users
     })
