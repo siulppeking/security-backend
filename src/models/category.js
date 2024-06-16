@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const { Schema, model } = require('mongoose');
 
-const CategorySchema = new mongoose.Schema({
+const CategorySchema = new Schema({
     name: {
         type: String,
         required: true
@@ -13,21 +13,26 @@ const CategorySchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: 'users',
+        required: true
+    },
     created_at: {
         type: Date,
         default: Date.now
     },
     updated_at: {
         type: Date,
-        default: Date.now
+        default: null
     },
     deleted_at: {
         type: Date,
-        default: Date.now
+        default: null
     }
 })
 
-const Category = mongoose.model('categories', CategorySchema);
+const Category = model('categories', CategorySchema);
 
 module.exports = {
     Category
