@@ -173,6 +173,7 @@ const check = async (req, res) => {
 
             return res.status(200).send({
                 uid: user.id,
+                name: user.name,
                 username: user.username,
                 email: user.email
             })
